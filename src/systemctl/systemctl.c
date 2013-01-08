@@ -1507,8 +1507,10 @@ static int start_unit_one(
                 r = set_put(s, p);
                 if (r < 0) {
                         free(p);
-                        log_error("Failed to add path to set.");
-                        return r;
+                        if (r != -EEXIST) {
+                                log_error("Failed to add path %s to set.", p);
+                                return r;
+                        }
                 }
         }
 
