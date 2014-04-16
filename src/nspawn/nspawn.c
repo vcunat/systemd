@@ -3157,6 +3157,7 @@ int main(int argc, char *argv[]) {
                                 goto finish;
                         }
                 } else {
+#if 0
                         const char *p;
 
                         p = strjoina(arg_directory,
@@ -3166,6 +3167,7 @@ int main(int argc, char *argv[]) {
                                 r = -EINVAL;
                                 goto finish;
                         }
+#endif
                 }
 
         } else {
