@@ -318,8 +318,7 @@ int main(int argc, char *argv[]) {
                         return EXIT_FAILURE;
                 }
 
-        cmdline[i++] = "/sbin/fsck";
-        cmdline[i++] =  arg_repair;
+        cmdline[i++] = "/run/current-system/sw/sbin/fsck";
         cmdline[i++] = "-T";
 
         /*
