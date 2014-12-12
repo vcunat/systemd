@@ -38,7 +38,7 @@ typedef struct FileDescriptor FileDescriptor;
 struct Window {
         MMapCache *cache;
 
-        unsigned keep_always;
+        bool keep_always;
         bool in_unused;
 
         int prot;
@@ -185,7 +185,7 @@ static void context_detach_window(Context *c) {
         c->window = NULL;
         LIST_REMOVE(by_window, w->contexts, c);
 
-        if (!w->contexts && w->keep_always == 0) {
+        if (!w->contexts && !w->keep_always) {
                 /* Not used anymore? */
                 LIST_PREPEND(unused, c->cache->unused, w);
                 if (!c->cache->last_unused)
@@ -352,8 +352,7 @@ static int try_context(
                 bool keep_always,
                 uint64_t offset,
                 size_t size,
-                void **ret,
-                void **release_cookie) {
+                void **ret) {
 
         Context *c;
 
@@ -361,6 +360,7 @@ static int try_context(
         assert(m->n_ref > 0);
         assert(fd >= 0);
         assert(size > 0);
+        assert(ret);
 
         c = hashmap_get(m->contexts, UINT_TO_PTR(context+1));
         if (!c)
@@ -378,12 +378,9 @@ static int try_context(
                 return 0;
         }
 
-        c->window->keep_always += keep_always;
+        c->window->keep_always |= keep_always;
 
-        if (ret)
-                *ret = (uint8_t*) c->window->ptr + (offset - c->window->offset);
-        if (keep_always && release_cookie)
-                *release_cookie = c->window;
+        *ret = (uint8_t*) c->window->ptr + (offset - c->window->offset);
         return 1;
 }
 
@@ -395,8 +392,7 @@ static int find_mmap(
                 bool keep_always,
                 uint64_t offset,
                 size_t size,
-                void **ret,
-                void **release_cookie) {
+                void **ret) {
 
         FileDescriptor *f;
         Window *w;
@@ -427,10 +423,7 @@ static int find_mmap(
         context_attach_window(c, w);
         w->keep_always += keep_always;
 
-        if (ret)
-                *ret = (uint8_t*) w->ptr + (offset - w->offset);
-        if (keep_always && release_cookie)
-                *release_cookie = c->window;
+        *ret = (uint8_t*) w->ptr + (offset - w->offset);
         return 1;
 }
 
@@ -443,8 +436,7 @@ static int add_mmap(
                 uint64_t offset,
                 size_t size,
                 struct stat *st,
-                void **ret,
-                void **release_cookie) {
+                void **ret) {
 
         uint64_t woffset, wsize;
         Context *c;
@@ -457,6 +449,7 @@ static int add_mmap(
         assert(m->n_ref > 0);
         assert(fd >= 0);
         assert(size > 0);
+        assert(ret);
 
         woffset = offset & ~((uint64_t) page_size() - 1ULL);
         wsize = size + (offset - woffset);
@@ -526,10 +519,7 @@ static int add_mmap(
         c->window = w;
         LIST_PREPEND(by_window, w->contexts, c);
 
-        if (ret)
-                *ret = (uint8_t*) w->ptr + (offset - w->offset);
-        if (keep_always && release_cookie)
-                *release_cookie = c->window;
+        *ret = (uint8_t*) w->ptr + (offset - w->offset);
         return 1;
 
 outofmem:
@@ -546,8 +536,7 @@ int mmap_cache_get(
                 uint64_t offset,
                 size_t size,
                 struct stat *st,
-                void **ret,
-                void **release_cookie) {
+                void **ret) {
 
         int r;
 
@@ -555,16 +544,17 @@ int mmap_cache_get(
         assert(m->n_ref > 0);
         assert(fd >= 0);
         assert(size > 0);
+        assert(ret);
 
         /* Check whether the current context is the right one already */
-        r = try_context(m, fd, prot, context, keep_always, offset, size, ret, release_cookie);
+        r = try_context(m, fd, prot, context, keep_always, offset, size, ret);
         if (r != 0) {
                 m->n_hit ++;
                 return r;
         }
 
         /* Search for a matching mmap */
-        r = find_mmap(m, fd, prot, context, keep_always, offset, size, ret, release_cookie);
+        r = find_mmap(m, fd, prot, context, keep_always, offset, size, ret);
         if (r != 0) {
                 m->n_hit ++;
                 return r;
@@ -573,39 +563,7 @@ int mmap_cache_get(
         m->n_missed++;
 
         /* Create a new mmap */
-        return add_mmap(m, fd, prot, context, keep_always, offset, size, st, ret, release_cookie);
-}
-
-int mmap_cache_release(
-                MMapCache *m,
-                int fd,
-                void *release_cookie) {
-
-        FileDescriptor *f;
-        Window *w;
-
-        assert(m);
-        assert(m->n_ref > 0);
-        assert(fd >= 0);
-
-        f = hashmap_get(m->fds, INT_TO_PTR(fd + 1));
-        if (!f)
-                return -EBADF;
-
-        assert(f->fd == fd);
-
-        LIST_FOREACH(by_fd, w, f->windows)
-                if (w == release_cookie)
-                        break;
-
-        if (!w)
-                return -ENOENT;
-
-        if (w->keep_always == 0)
-                return -ENOLCK;
-
-        w->keep_always -= 1;
-        return 0;
+        return add_mmap(m, fd, prot, context, keep_always, offset, size, st, ret);
 }
 
 void mmap_cache_close_fd(MMapCache *m, int fd) {
