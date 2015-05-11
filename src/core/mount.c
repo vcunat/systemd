@@ -399,7 +399,7 @@ static int mount_add_quota_links(Mount *m) {
 static bool should_umount(Mount *m) {
         MountParameters *p;
 
-        if (PATH_IN_SET(m->where, "/", "/usr") ||
+        if (PATH_IN_SET(m->where, "/", "/usr", "/nix", "/nix/store") ||
             path_startswith(m->where, "/run/initramfs"))
                 return false;
 
@@ -430,7 +430,7 @@ static int mount_add_default_dependencies(Mount *m) {
          * Also, don't bother with anything mounted below virtual
          * file systems, it's also going to be virtual, and hence
          * not worth the effort. */
-        if (PATH_IN_SET(m->where, "/", "/usr") ||
+        if (PATH_IN_SET(m->where, "/", "/usr", "/nix", "/nix/store") ||
             path_startswith(m->where, "/run/initramfs") ||
             path_startswith(m->where, "/proc") ||
             path_startswith(m->where, "/sys") ||
