@@ -1655,7 +1655,8 @@ static void unit_check_binds_to(Unit *u) {
                 return;
 
         assert(other);
-        log_unit_info(u->id, "Unit %s is bound to inactive unit %s. Stopping, too.", u->id, other->id);
+        if (u->type != UNIT_MOUNT || detect_container(NULL) <= 0)
+                log_unit_info(u->id, "Unit %s is bound to inactive unit %s. Stopping, too.", u->id, other->id);
 
         /* A unit we need to run is gone. Sniff. Let's stop this. */
         manager_add_job(u->manager, JOB_STOP, u, JOB_FAIL, true, NULL, NULL);
