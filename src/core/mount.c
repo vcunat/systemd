@@ -369,7 +369,9 @@ static bool should_umount(Mount *m) {
         MountParameters *p;
 
         if (path_equal(m->where, "/") ||
-            path_equal(m->where, "/usr"))
+            path_equal(m->where, "/usr") ||
+            path_equal(m->where, "/nix") ||
+            path_equal(m->where, "/nix/store"))
                 return false;
 
         p = get_mount_parameters(m);
@@ -400,6 +402,8 @@ static int mount_add_default_dependencies(Mount *m) {
          * virtual, and hence not worth the effort. */
         if (path_equal(m->where, "/") ||
             path_equal(m->where, "/usr") ||
+            path_equal(m->where, "/nix") ||
+            path_equal(m->where, "/nix/store") ||
             path_startswith(m->where, "/proc") ||
             path_startswith(m->where, "/sys") ||
             path_startswith(m->where, "/dev"))
