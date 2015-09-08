@@ -315,7 +315,7 @@ int main(int argc, char *argv[]) {
                         return EXIT_FAILURE;
                 }
 
-        cmdline[i++] = "/run/current-system/sw/sbin/fsck";
+        cmdline[i++] = "/run/current-system/sw/bin/fsck";
         cmdline[i++] = "-T";
 
         /*
