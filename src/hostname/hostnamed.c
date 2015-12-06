@@ -420,6 +420,9 @@ static int method_set_hostname(sd_bus_message *m, void *userdata, sd_bus_error *
         if (r < 0)
                 return r;
 
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
+
         if (isempty(name))
                 name = c->data[PROP_STATIC_HOSTNAME];
 
@@ -478,6 +481,9 @@ static int method_set_static_hostname(sd_bus_message *m, void *userdata, sd_bus_
         r = sd_bus_message_read(m, "sb", &name, &interactive);
         if (r < 0)
                 return r;
+
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
 
         name = empty_to_null(name);
 
@@ -544,6 +550,9 @@ static int set_machine_info(Context *c, sd_bus_message *m, int prop, sd_bus_mess
         r = sd_bus_message_read(m, "sb", &name, &interactive);
         if (r < 0)
                 return r;
+
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
 
         name = empty_to_null(name);
 

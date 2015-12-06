@@ -365,6 +365,9 @@ static int method_set_timezone(sd_bus_message *m, void *userdata, sd_bus_error *
         if (r < 0)
                 return r;
 
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
+
         if (!timezone_is_valid(z))
                 return sd_bus_error_setf(error, SD_BUS_ERROR_INVALID_ARGS, "Invalid time zone '%s'", z);
 
@@ -435,6 +438,9 @@ static int method_set_local_rtc(sd_bus_message *m, void *userdata, sd_bus_error 
         r = sd_bus_message_read(m, "bbb", &lrtc, &fix_system, &interactive);
         if (r < 0)
                 return r;
+
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
 
         if (lrtc == c->local_rtc)
                 return sd_bus_reply_method_return(m, NULL);
@@ -525,6 +531,9 @@ static int method_set_time(sd_bus_message *m, void *userdata, sd_bus_error *erro
         assert(m);
         assert(c);
 
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
+
         if (c->use_ntp)
                 return sd_bus_error_setf(error, BUS_ERROR_AUTOMATIC_TIME_SYNC_ENABLED, "Automatic time synchronization is enabled");
 
@@ -610,6 +619,9 @@ static int method_set_ntp(sd_bus_message *m, void *userdata, sd_bus_error *error
         r = sd_bus_message_read(m, "bb", &enabled, &interactive);
         if (r < 0)
                 return r;
+
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
 
         if ((bool)enabled == c->use_ntp)
                 return sd_bus_reply_method_return(m, NULL);
