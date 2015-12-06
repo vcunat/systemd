@@ -906,6 +906,9 @@ static int method_set_locale(sd_bus_message *m, void *userdata, sd_bus_error *er
         if (r < 0)
                 return r;
 
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
+
         /* Check whether a variable changed and if it is valid */
         STRV_FOREACH(i, l) {
                 bool valid = false;
@@ -1043,6 +1046,9 @@ static int method_set_vc_keyboard(sd_bus_message *m, void *userdata, sd_bus_erro
         if (r < 0)
                 return r;
 
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
+
         if (isempty(keymap))
                 keymap = NULL;
 
@@ -1164,6 +1170,9 @@ static int method_set_x11_keyboard(sd_bus_message *m, void *userdata, sd_bus_err
         r = sd_bus_message_read(m, "ssssbb", &layout, &model, &variant, &options, &convert, &interactive);
         if (r < 0)
                 return r;
+
+        return sd_bus_error_setf(error, SD_BUS_ERROR_NOT_SUPPORTED,
+            "Changing system settings via systemd is not supported on NixOS.");
 
         if (isempty(layout))
                 layout = NULL;
