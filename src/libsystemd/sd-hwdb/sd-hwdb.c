@@ -270,13 +270,8 @@ static int trie_search_f(sd_hwdb *hwdb, const char *search) {
 }
 
 static const char hwdb_bin_paths[] =
-        "/etc/systemd/hwdb/hwdb.bin\0"
         "/etc/udev/hwdb.bin\0"
-        "/usr/lib/systemd/hwdb/hwdb.bin\0"
-#ifdef HAVE_SPLIT_USR
-        "/lib/systemd/hwdb/hwdb.bin\0"
-#endif
-        UDEVLIBEXECDIR "/hwdb.bin\0";
+        ;
 
 _public_ int sd_hwdb_new(sd_hwdb **ret) {
         _cleanup_(sd_hwdb_unrefp) sd_hwdb *hwdb = NULL;
