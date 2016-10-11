@@ -70,7 +70,7 @@ static int context_read_data(Context *c) {
 
         r = get_timezone(&t);
         if (r == -EINVAL)
-                log_warning_errno(r, "/etc/localtime should be a symbolic link to a time zone data file in /usr/share/zoneinfo/.");
+                log_warning_errno(r, "/etc/localtime should be a symbolic link to a time zone data file in /etc/zoneinfo/.");
         else if (r < 0)
                 log_warning_errno(r, "Failed to get target of /etc/localtime: %m");
 
@@ -96,7 +96,7 @@ static int context_write_data_timezone(Context *c) {
                 return r;
         }
 
-        p = strappend("../usr/share/zoneinfo/", c->zone);
+        p = strappend("zoneinfo/", c->zone);
         if (!p)
                 return log_oom();
 

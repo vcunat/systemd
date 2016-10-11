@@ -54,7 +54,7 @@
   </refnamediv>
 
   <refsynopsisdiv>
-    <para><filename>/etc/localtime</filename> -&gt; <filename>../usr/share/zoneinfo/…</filename></para>
+    <para><filename>/etc/localtime</filename> -&gt; <filename>zoneinfo/…</filename></para>
   </refsynopsisdiv>
 
   <refsect1>
@@ -64,7 +64,7 @@
     system-wide timezone of the local system that is used by
     applications for presentation to the user. It should be an
     absolute or relative symbolic link pointing to
-    <filename>/usr/share/zoneinfo/</filename>, followed by a timezone
+    <filename>/etc/zoneinfo/</filename>, followed by a timezone
     identifier such as <literal>Europe/Berlin</literal> or
     <literal>Etc/UTC</literal>. The resulting link should lead to the
     corresponding binary
